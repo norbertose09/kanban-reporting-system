@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Task;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class TaskService
@@ -16,15 +17,15 @@ class TaskService
      */
     public function createTask(array $data): Task
     {
-        $this->validateTaskData($data);
+        $validated = $this->validateTaskData($data);
 
         return Task::create([
-            'project_id' => $data['project_id'],
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-            'status' => $data['status'] ?? 'pending',
-            'assigned_to' => $data['assigned_to'] ?? null,
-            'due_date' => $data['due_date'] ?? null,
+            'project_id' => $validated['project_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'] ?? 'pending',
+            'assigned_to' => $validated['assigned_to'] ?? null,
+            'due_date' => $validated['due_date'] ?? null,
         ]);
     }
 
@@ -38,14 +39,14 @@ class TaskService
      */
     public function updateTask(Task $task, array $data): Task
     {
-        $this->validateTaskData($data, $task->id);
+        $validated = $this->validateTaskData($data, $task->id);
 
         $task->update([
-            'title' => $data['title'] ?? $task->title,
-            'description' => $data['description'] ?? $task->description,
-            'status' => $data['status'] ?? $task->status,
-            'assigned_to' => $data['assigned_to'] ?? $task->assigned_to,
-            'due_date' => $data['due_date'] ?? $task->due_date,
+            'title' => $validated['title'] ?? $task->title,
+            'description' => $validated['description'] ?? $task->description,
+            'status' => $validated['status'] ?? $task->status,
+            'assigned_to' => $validated['assigned_to'] ?? $task->assigned_to,
+            'due_date' => $validated['due_date'] ?? $task->due_date,
         ]);
 
         return $task;
@@ -76,28 +77,32 @@ class TaskService
      *
      * @param array $data
      * @param int|null $taskId
+     * @return array
      * @throws ValidationException
      */
-    protected function validateTaskData(array $data, ?int $taskId = null): void
+    protected function validateTaskData(array $data, ?int $taskId = null): array
     {
         $rules = [
-            'project_id' => 'sometimes|required|exists:projects,id',
-            'title' => 'sometimes|required|string|max:255',
+            'project_id' => 'required|exists:projects,id',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'sometimes|required|in:pending,in-progress,done',
+            'status' => 'in:pending,in-progress,done',
             'assigned_to' => 'nullable|exists:users,id',
             'due_date' => 'nullable|date',
         ];
 
         if ($taskId) {
-            $rules['project_id'] = 'sometimes|exists:projects,id';
-            $rules['title'] = 'sometimes|string|max:255';
+            foreach ($rules as $key => &$rule) {
+                $rule = 'sometimes|' . $rule;
+            }
         }
 
-        $validator = validator($data, $rules);
+        $validator = Validator::make($data, $rules);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
+
+        return $validator->validated();
     }
 }

@@ -55,7 +55,7 @@ class TaskServiceTest extends TestCase
             'description' => $data['description'],
             'status' => $data['status'],
             'assigned_to' => $data['assigned_to'],
-            'due_date' => $data['due_date'],
+            'due_date' => $data['due_date'] . ' 00:00:00',
         ]);
         $this->assertEquals($data['title'], $task->title); // Check specific properties
         $this->assertEquals($data['status'], $task->status);
