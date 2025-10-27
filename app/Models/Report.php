@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Report extends Model
+{
+    protected $fillable = [
+        'project_id',
+        'total_tasks',
+        'completed_tasks',
+        'pending_tasks',
+        'in_progress_tasks',
+        'last_generated_at',
+    ];
+
+    protected $casts = [
+        'last_generated_at' => 'datetime',
+    ];
+
+    /**
+     * A report belongs to one project.
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+}
