@@ -8,7 +8,7 @@ This project allows users to create projects, manage tasks, and organize work ef
 ## 🚀 Features
 
 -   ✅ Create and manage projects
--   📝 Add, edit, and delete tasks
+-   📝 Add tasks
 -   🔄 Drag and drop tasks between columns _(Pending, In Progress, Completed)_
 -   🪟 Task modals for viewing and updating task details
 -   ⚡ Built with **Laravel 11**, **Inertia.js**, **React**, and **Tailwind CSS**
